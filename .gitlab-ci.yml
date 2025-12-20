@@ -1,0 +1,87 @@
+workflow:
+  name: "deploy"
+  auto_cancel:
+    on_job_failure: all
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    - if: '$CI_COMMIT_BRANCH =~ /^test.*/'
+      when: always
+
+stages:
+  - build_image
+  - restart_container
+  - success_notifications
+  - failure_notifications
+
+variables:
+  DEBUG: 0
+  CONFIG_FILENAME: "config.json"
+
+
+build_image:
+  stage: build_image
+  before_script:
+    - export CLEAN_TAG=$(echo ${CI_COMMIT_BRANCH} | sed -E 's/\W+//g')
+    - export SOURCE_IMAGE_NAME="${CI_PROJECT_NAME}:${CLEAN_TAG}"
+    - export CONTAINER_NAME="${CI_PROJECT_NAME}-${CLEAN_TAG}"
+    - |
+      if [[ "${CI_COMMIT_BRANCH}" != "${CI_DEFAULT_BRANCH}" ]]; then
+        export CONFIG_FILENAME="config__${CLEAN_TAG}.json";
+        export SERVER_DOMAIN='' DEBUG=1;
+        export SERVICE_PORT=$(eval "echo \${${CLEAN_TAG}__SERVICE_PORT}");
+      fi
+    - echo "CLEAN_TAG=${CLEAN_TAG}" >> variables.env
+    - echo "CONTAINER_NAME=${CONTAINER_NAME}" >> variables.env
+    - echo "CONFIG_FILENAME=${CONFIG_FILENAME}" >> variables.env
+    - echo "SOURCE_IMAGE_NAME=${SOURCE_IMAGE_NAME}" >> variables.env
+    - echo "DEBUG=${DEBUG} SERVER_DOMAIN=${SERVER_DOMAIN} SERVICE_PORT=${SERVICE_PORT}" >> variables.env
+  script: >
+    docker buildx build --load
+    --tag=${SOURCE_IMAGE_NAME}
+    --build-arg COMMIT_SHA=${CI_COMMIT_SHORT_SHA}
+    --build-arg GIT_BRANCH=${CI_COMMIT_BRANCH}
+    --file Dockerfile .
+  artifacts:
+    expire_in: "5 mins"
+    paths:
+      - ./variables.env
+
+restart_container:
+  stage: restart_container
+  dependencies:
+    - build_image
+  before_script:
+    - export $(cat ./variables.env)
+    - docker stop ${CONTAINER_NAME} || true
+    - docker rm ${CONTAINER_NAME} || true
+  script: >
+    docker run -d --restart always
+    --name ${CONTAINER_NAME}
+    --publish ${SERVICE_PORT}:8080
+    --volume "/etc/localtime:/etc/localtime:ro"
+    --volume "/etc/timezone:/etc/timezone:ro"
+    --volume "${PROJECT_DIR}/${CONFIG_FILENAME}:/config.json:ro"
+    ${SOURCE_IMAGE_NAME}
+
+success_notifications:
+  stage: success_notifications
+  dependencies:
+    - build_image
+    - restart_container
+  rules:
+    - when: on_success
+      allow_failure: false
+    - when: on_failure
+    - when: never
+
+  script:
+    - echo "done! ${CI_PROJECT_NAME} -> ${CLEAN_TAG}"
+
+failure_notifications:
+  stage: failure_notifications
+  rules:
+    - when: on_failure
+      allow_failure: true
+  script:
+    - echo "fail! ${CI_PROJECT_NAME} >< ${CLEAN_TAG}"

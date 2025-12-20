@@ -1,0 +1,12 @@
+services:
+  monitoring_draft_laws:
+    image: monitoring_draft_laws:dev
+    network_mode: host
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: never
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - ./config.json:/config.json:ro

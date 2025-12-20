@@ -1,0 +1,9 @@
+docs
+config*.json
+node_modules
+cards_template.html
+service_data
+src/backend/config_example.json
+.env
+*.json
+config.*.json

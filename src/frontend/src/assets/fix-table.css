@@ -1,0 +1,32 @@
+.normalize-table.el-table {
+    --el-table-tr-bg-color: var(--el-table-bg-color) !important;
+    --el-table-header-bg-color: var(--el-table-bg-color) !important;
+    --el-table-text-color: var(--el-text-color-primary) !important;
+    --table-body-text-color: var(--el-text-color-primary);
+
+    thead {
+        th {
+            background: var(--el-table-bg-color);
+        }
+
+        .cell {
+            text-align: center;
+            color: var(--table-body-text-color);
+            word-break: keep-all;
+            white-space: pre-line;
+        }
+    }
+
+    .el-table__body {
+        .el-table__cell {
+            vertical-align: top;
+
+            .cell {
+                color: var(--table-body-text-color);
+                /* word-break: keep-all; */
+                /* white-space: pre-line; */
+                /* text-align: start; */
+            }
+        }
+    }
+}
