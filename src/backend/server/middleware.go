@@ -58,8 +58,6 @@ func (app *Application) setCookies(w http.ResponseWriter, r *http.Request, u *Us
 	var domain = app.config.Srv.Domain
 	if !app.config.Srv.SSL {
 		sameSite = http.SameSiteLaxMode
-	} else {
-		sameSite = http.SameSiteNoneMode
 	}
 	if len(domain) == 0 {
 		domain = r.Host
@@ -305,7 +303,7 @@ func (app *Application) CORSHandler(h http.Handler) http.Handler {
 		headers.Set("Access-Control-Allow-Headers", allowedHeadersCORS)
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		slog.Info("request",
+		slog.Debug("request",
 			slog.Any("headers", r.Header),
 			slog.String("host", r.Host),
 			slog.String("RemoteAddr", r.RemoteAddr))

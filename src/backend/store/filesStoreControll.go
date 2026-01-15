@@ -4,10 +4,17 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
 )
+
+func deferRollback(ctx context.Context, tx pgx.Tx) {
+	if err := tx.Rollback(ctx); err != nil {
+		slog.Error("FileStorageRollback", slog.String("error", err.Error()))
+	}
+}
 
 func (db *DB) InsertNewFile(ctx context.Context, rc io.ReadCloser, af AdditionFile) (fileInfo map[string]string, err error) {
 	defer rc.Close()
@@ -21,7 +28,7 @@ INSERT
         , object_id
     )
 VALUES(
-    $1
+    $1::text
     , $2::jsonb
     , $3
 )
@@ -30,7 +37,7 @@ RETURNING id`
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer deferRollback(ctx, tx)
 
 	lobs := tx.LargeObjects()
 	oid, err := lobs.Create(ctx, 0)
@@ -58,7 +65,7 @@ RETURNING id`
 	return map[string]string{
 		"id":  fileID,
 		"url": fmt.Sprintf("/api/file?id=%s", fileID),
-	}, nil
+	}, err
 }
 func (db *DB) GetDocumentFilesMeta(ctx context.Context, did string) (AdditionFileList, error) {
 	const q = `
@@ -69,9 +76,9 @@ SELECT
 FROM
     monitoring_draft_laws.additional_files
 WHERE
-    document_id = $1
+    document_id = @document_id::text
 ORDER BY created ASC`
-	rows, err := db.pool.Query(ctx, q, did)
+	rows, err := db.pool.Query(ctx, q, pgx.NamedArgs{"document_id": did})
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +114,7 @@ WHERE
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer deferRollback(ctx, tx)
 	lobs := tx.LargeObjects()
 	obj, err := lobs.Open(ctx, oid, pgx.LargeObjectModeRead)
 	if err != nil {
@@ -122,10 +129,10 @@ WHERE
 	_, err = io.Copy(w, obj)
 	return
 }
-func (db *DB) DeleteFile(ctx context.Context, did string) error {
+func (db *DB) DeleteFile(ctx context.Context, did string) (err error) {
 	const q = `
 DELETE FROM monitoring_draft_laws.additional_files
 WHERE id=$1::uuid`
-	_, err := db.pool.Exec(ctx, q, did)
-	return err
+	_, err = db.pool.Exec(ctx, q, did)
+	return
 }
