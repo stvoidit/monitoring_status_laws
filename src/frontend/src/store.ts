@@ -4,6 +4,7 @@ import { GetDocuments, FetchUpdateAll, DownloadDocuments } from "@/api";
 import { MessageAlert, MessageSuccess } from "@/composibles/useAlert";
 import { defineStore } from "pinia";
 import useFilters from "./composibles/useFilters";
+import { fnMapData } from "@/utils/makePDF";
 
 const useStore = defineStore("main", () => {
     const loading = ref(false);
@@ -147,9 +148,11 @@ const useStore = defineStore("main", () => {
         const visibleProps = visibleFields.map(f => f.prop);
         visibleHeaders.unshift("#");
         visibleProps.unshift("#");
+        // const fnMapData = (d: LawDocument, index: number) => d.ArrayValues(index + 1, visibleProps);
+        const contentData = computedTableData.value.map(fnMapData(visibleProps));
         const buildData = {
             headers: visibleHeaders,
-            data: computedTableData.value.map((d, index) => d.ArrayValues(index + 1, visibleProps)),
+            data: contentData,
         };
         return buildData;
     };
@@ -179,23 +182,8 @@ const useStore = defineStore("main", () => {
     const paginationSize = computed(() => computedTableData.value.length);
 
     async function downloadPDF() {
-        const visibleFields = [
-            { label: "#", prop: "#" },
-            { label: "Краткое название", prop: "short_label" },
-            { label: "Краткое содержание", prop: "desc" },
-            { label: "Примечания", prop: "note" },
-            { label: "Название", prop: "label" },
-            { label: "Статус", prop: "status" },
-            { label: "Идентификатор", prop: "project" },
-        ];
-        const visibleHeaders = visibleFields.map(f => f.label);
-        const visibleProps = visibleFields.map(f => f.prop);
-        const buildData = {
-            headers: visibleHeaders,
-            data: computedTableData.value.map((d, index) => d.ArrayValues(index + 1, visibleProps)),
-        };
-        const { makePDF } = await import("@/utils/makePDF");
-        makePDF(buildData);
+        const { downloadPDF } = await import("@/utils/makePDF");
+        await downloadPDF(toValue(computedTableData.value));
     };
 
     return {
