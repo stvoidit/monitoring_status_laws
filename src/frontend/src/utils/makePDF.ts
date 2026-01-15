@@ -1,5 +1,5 @@
 import { createPdf } from "pdfmake";
-import normalFont from "@/assets/fonts/TT Moscow Economy Regular.ttf?url";
+import normalFont from "@/assets/fonts/TT Moscow Economy Normal.ttf?url";
 import boldFont from "@/assets/fonts/TT Moscow Economy Bold.ttf?url";
 import italicsFont from "@/assets/fonts/TT Moscow Economy Italic.ttf?url";
 import bolditalicsFont from "@/assets/fonts/TT Moscow Economy Bold Italic.ttf?url";
