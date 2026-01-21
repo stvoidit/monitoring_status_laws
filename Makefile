@@ -51,11 +51,11 @@ db.dump:
 	pg_dump --verbose \
 		--host=${PGHOST} --port=${PGPORT} \
 		--username=${PGUSER} --format=c --compress=8 --encoding=UTF-8 \
-		--no-privileges --file ../${PGDATABASE}.dump ${PGDATABASE}
+		--no-privileges --file ./${PGDATABASE}.dump ${PGDATABASE}
 
 db.restore:
 	$(info "${PGHOST}:${PGPORT}/${PGDATABASE}")
 	pg_restore \
 		--host=${PGHOST:-localhost} --port=${PGPORT:-5432} --username=${PGUSER} \
 		--create --clean --if-exists --format=c --dbname=postgres \
-		--no-owner --verbose -x ../${PGDATABASE}.dump
+		--no-owner --verbose -x ./${PGDATABASE}.dump
