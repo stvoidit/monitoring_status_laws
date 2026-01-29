@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"runtime"
 	"strconv"
@@ -10,11 +9,13 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/tern/v2/migrate"
 )
 
 // DB - ...
 type DB struct {
 	pool *pgxpool.Pool
+	m    *migrate.Migrator
 }
 
 type Logger struct {
@@ -47,7 +48,6 @@ func NewDB(connString string) (*DB, error) {
 	poolConfig.MaxConns = int32(runtime.NumCPU())
 	poolConfig.MaxConnLifetime = time.Minute * 10
 	poolConfig.MaxConnIdleTime = time.Minute * 5
-	fmt.Printf("%+v\n", poolConfig)
 	poolConfig.ConnConfig.Tracer = &Logger{}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
@@ -64,3 +64,12 @@ func NewDB(connString string) (*DB, error) {
 
 // Close - закрытие соединений
 func (db *DB) Close() { db.pool.Close() }
+
+// func (db *DB) CheckMigrations(ctx context.Context) error {
+// 	const versionTable = "monitoring_draft_laws."
+// 	m, err := migrate.NewMigrator(ctx, conn, versionTable)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	m.LoadMigrations()
+// }

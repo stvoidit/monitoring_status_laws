@@ -39,7 +39,6 @@ container.run:
 		monitoring_draft_laws:dev
 
 
-
 ddl:
 	pg_dump --host=${PGHOST} --port=${PGPORT} --username=${PGUSER} --dbname=megaplan --schema=monitoring_draft_laws -x --format=plain --schema-only --no-owner --create > monitoring_draft_laws.sql
 
@@ -59,3 +58,14 @@ db.restore:
 		--host=${PGHOST:-localhost} --port=${PGPORT:-5432} --username=${PGUSER} \
 		--create --clean --if-exists --format=c --dbname=postgres \
 		--no-owner --verbose -x ./${PGDATABASE}.dump
+
+
+
+migrate:
+	$(MAKE) -C src/backend migrate
+migrate.init:
+	$(MAKE) -C src/backend migrate.init
+migrate.gengen:
+	$(MAKE) -C src/backend migrate.gengen
+migrate.undo:
+	$(MAKE) -C src/backend migrate.undo
