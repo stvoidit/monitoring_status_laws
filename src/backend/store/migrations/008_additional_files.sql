@@ -18,7 +18,5 @@ ADD CONSTRAINT additional_files_documents_data_fk FOREIGN KEY (document_id) REFE
 
 CREATE UNIQUE INDEX additional_files_id_idx ON monitoring_draft_laws.additional_files USING btree (id);
 
-CREATE INDEX cancellation_phrases_idx ON monitoring_draft_laws.cancellation_policy USING gin (cancellation_phrases);
-
 ---- create above / drop below ----
 DROP TABLE monitoring_draft_laws.additional_files

@@ -7,6 +7,8 @@ CREATE TABLE
 ALTER TABLE ONLY monitoring_draft_laws.cancellation_policy
 ADD CONSTRAINT cancellation_policy_un UNIQUE (HOST);
 
+CREATE INDEX cancellation_phrases_idx ON monitoring_draft_laws.cancellation_policy USING gin (cancellation_phrases);
+
 INSERT INTO
     monitoring_draft_laws.cancellation_policy (HOST, cancellation_phrases)
 VALUES
