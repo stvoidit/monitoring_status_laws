@@ -1,5 +1,10 @@
 <template>
-    <MainPageHeader v-model="fields" />
+    <MainPageHeader
+        v-model="fields"
+        @download-p-d-f="downloadPDF"
+        @download-x-l-s-x="downloadDocuments"
+        @add-document="fetchDocuments"
+        @update-all="fetchUpdateAll" />
     <el-container direction="horizontal">
         <el-aside width="250px">
             <FilterTypes
@@ -32,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, onBeforeMount } from "vue";
 import useStore from "@/store";
 import { storeToRefs } from "pinia";
 import MainPageHeader from "./components/MainPageHeader.vue";
@@ -44,6 +49,10 @@ const store = useStore();
 const {
     resetFilters,
     fetchDocuments,
+    fetchUpdateAll,
+    downloadPDF,
+    downloadDocuments,
+    loadFieldsSettings,
 } = store;
 const {
     paginationSize,
@@ -52,7 +61,9 @@ const {
     filters,
     fields,
 } = storeToRefs(store);
+
 onMounted(fetchDocuments);
+onBeforeMount(loadFieldsSettings);
 
 </script>
 

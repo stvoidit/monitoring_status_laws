@@ -235,3 +235,12 @@ export const downloadExternalFile = async ({ id, source, name }: { id: string; s
 };
 
 export const isCanceledError = axios.isCancel;
+
+export /** функции-перемещения по страницам */
+function openTelegrmBot() {
+    const encodeUserID = window.btoa(appInfo.user?.id.toString() ?? "");
+    const tgbotURL = new URL("https://t.me/");
+    tgbotURL.pathname = appInfo.tg_bot_name;
+    tgbotURL.searchParams.append("start", encodeUserID);
+    window.open(tgbotURL, "_blank");
+}

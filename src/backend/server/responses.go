@@ -1,17 +1,14 @@
 package server
 
 import (
+	"encoding/json"
 	"io"
 	"io/fs"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
-
-	jsoniter "github.com/json-iterator/go"
 )
-
-var json = jsoniter.ConfigFastest
 
 func deferErrLog(err error) {
 	if err != nil {

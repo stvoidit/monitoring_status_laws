@@ -7,3 +7,4 @@ src/backend/config_example.json
 .env
 *.json
 config.*.json
+*.dump
