@@ -1,10 +1,10 @@
-FROM golang:1.25.5-alpine3.22 AS backend
+FROM golang:1.25.6-alpine3.23 AS backend
 WORKDIR /app
 COPY src/backend .
-ENV CGO_ENABLED=0 GOARCH=amd64 GOOS=linux
+ENV CGO_ENABLED=0 GOARCH=amd64 GOOS=linux GOEXPERIMENT='greenteagc,jsonv2'
 RUN go build -mod=vendor -ldflags "-s -w" -o ./build/monitoring_draft_laws ./main.go
 
-FROM node:24.12-alpine3.22 AS frontend
+FROM node:24.13-alpine3.23 AS frontend
 ENV PNPM_HOME="/pnpm" PATH+=":$PNPM_HOME"
 RUN corepack enable
 WORKDIR /app
@@ -15,10 +15,10 @@ COPY src/frontend/public public
 COPY src/frontend/src src
 RUN pnpm build
 
-FROM alpine:3.22
-ARG GIT_BRANCH COMMIT_SHA
-LABEL git.repository="https://git.ias.cnd/ias/go/monitoring_draft_laws"
-LABEL git.remote.origin.url="git@git.ias.cnd:ias/go/monitoring_draft_laws.git"
+FROM alpine:3.23
+ARG GIT_BRANCH=dev COMMIT_SHA=dev
+LABEL git.repository="https://github.com/stvoidit/monitoring_status_laws"
+LABEL git.remote.origin.url="git@github.com:stvoidit/monitoring_status_laws.git"
 LABEL git.remote.origin.branch="${GIT_BRANCH}"
 LABEL git.remote.origin.commit_sha="${COMMIT_SHA}"
 COPY --from=frontend app/dist /www/data/static

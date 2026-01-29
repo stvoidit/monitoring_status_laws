@@ -1,10 +1,11 @@
 package config
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
+	"net"
 	"net/url"
 	"os"
 )
@@ -40,11 +41,9 @@ type Config struct {
 }
 
 func (cnf Config) String() string {
-	var buf = bytes.NewBuffer(nil)
-	e := json.NewEncoder(buf)
-	e.SetIndent("", "  ")
-	e.Encode(cnf)
-	return buf.String()
+	buf, err := json.MarshalIndent(cnf, "", "  ")
+	checkErrUtil("cnf.String", err)
+	return string(buf)
 }
 
 // LoadConfig - ...
@@ -76,7 +75,9 @@ func LoadConfigFromFile(filename string) (cnf *Config, err error) {
 		createDefaultConfig()
 		return nil, fmt.Errorf("файл конфигурации не найден: %w, сгенерирован шаблон файла конфигурации \"config_example.json\"", err)
 	}
-	defer file.Close()
+	if err := file.Close(); err != nil {
+		return nil, err
+	}
 	return LoadConfig(file)
 }
 
@@ -85,12 +86,12 @@ func createDefaultConfig() {
 	if err != nil {
 		panic(err)
 	}
-	defer w.Close()
+	defer checkErrUtil("createDefaultConfig.Close", w.Close())
 	var cnf = new(Config)
 	cnf.Srv.Address = "0.0.0.0:8080"
 	e := json.NewEncoder(w)
 	e.SetIndent("", "\t")
-	e.Encode(cnf)
+	checkErrUtil("createDefaultConfig.Encode", e.Encode(cnf))
 }
 
 // ContainsInDepartment - переданный int64 содержится в списке []int64
@@ -109,7 +110,7 @@ func (cnf Config) ContainsInDepartment(depID int64) bool {
 func (cnf Config) ConnStringDB() string {
 	var connUrl = url.URL{
 		Scheme: "postgresql",
-		Host:   cnf.DB.Host + ":" + cnf.DB.Port,
+		Host:   net.JoinHostPort(cnf.DB.Host, cnf.DB.Port),
 		Path:   cnf.DB.Dbname,
 		User:   url.UserPassword(cnf.DB.Login, cnf.DB.Password),
 		RawQuery: (url.Values{
@@ -129,4 +130,10 @@ func (cnf Config) ServiceAddr() string {
 		Host:   cnf.Srv.Domain,
 	}
 	return addr.String()
+}
+
+func checkErrUtil(label string, err error) {
+	if err != nil {
+		slog.Warn(label, slog.String("error", err.Error()))
+	}
 }

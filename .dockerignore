@@ -32,3 +32,4 @@ testhelpers
 *.doc
 *.got
 *_easyjson.go
+*.dump
