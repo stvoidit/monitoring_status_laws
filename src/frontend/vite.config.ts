@@ -67,12 +67,10 @@ export default ({ mode }: ConfigEnv) => {
             },
         },
         build: {
-            cssMinify: "lightningcss",
-            // target: "esnext",
             outDir: "dist",
+            cssMinify: true,
             manifest: false,
             minify: true,
-            // minify: "esbuild",
             emptyOutDir: true,
             sourcemap: isDev,
             cssCodeSplit: true,
