@@ -4,7 +4,7 @@ import { GetDocuments, FetchUpdateAll, DownloadDocuments } from "@/api";
 import { MessageAlert, MessageSuccess } from "@/composibles/useAlert";
 import { defineStore } from "pinia";
 import useFilters from "./composibles/useFilters";
-import { fnMapData } from "@/utils/makePDF";
+import { fnMapData, downloadPDF } from "@/utils/makePDF";
 
 const useStore = defineStore("main", () => {
     const loading = ref(false);
@@ -181,11 +181,6 @@ const useStore = defineStore("main", () => {
 
     const paginationSize = computed(() => computedTableData.value.length);
 
-    async function downloadPDF() {
-        const { downloadPDF } = await import("@/utils/makePDF");
-        await downloadPDF(toValue(computedTableData.value));
-    };
-
     return {
         fields,
         filters,
@@ -204,7 +199,7 @@ const useStore = defineStore("main", () => {
         paginationSize,
         loading,
         scopeOptions,
-        downloadPDF,
+        downloadPDF: () => downloadPDF(toValue(computedTableData.value)),
         loadFieldsSettings,
         indexMethod,
     };
