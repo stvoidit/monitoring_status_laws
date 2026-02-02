@@ -134,7 +134,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { parseSourceURL } from "@/utils/parseSource";
-import { ElNotification, ElMessageBox, ElText } from "element-plus";
+import { ElNotification, ElMessageBox, ElText, type Action } from "element-plus";
 import FavoriteButton from "@/components/FavoriteButton.vue";
 import {
     Back as ElBack,
@@ -250,25 +250,20 @@ const shareLink = () => {
 const handleSetSource = async () => {
     const message = "Введите ссылку на документ";
     const title = "Добавление источника документа";
+    const callback = (value: string, action: Action) => {
+        if (action !== "confirm") return;
+        const payload = parseSourceURL(value);
+        emit("source", payload);
+    };
     try {
-        const result = await ElMessageBox.prompt(message, title, {
+        await ElMessageBox.prompt(message, title, {
+            boxType: "prompt",
             confirmButtonText: "Добавить",
             cancelButtonText: "Закрыть",
-            // inputPattern: RegExp(/https:\/\/[]/),
-            // inputValidator: (valueText) => {
-            //     try {
-            //         parseSourceURL(valueText);
-            //     } catch (error) {
-            //         return (error as Error).message;
-            //     }
-            //     return true;
-            // },
+            callback,
         });
-        if (result.action !== "confirm") return;
-        const payload = parseSourceURL(result.value);
-        emit("source", payload);
     } catch (error) {
-        if (error instanceof Error) {
+        if (Error.isError(error)) {
             console.warn(error);
         }
     }

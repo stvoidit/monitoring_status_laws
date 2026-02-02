@@ -40,7 +40,7 @@ import { storeToRefs } from "pinia";
 import type { LawDocument } from "@/api/models";
 import { useTemplateRef, onUpdated, h } from "vue";
 import { useRouter } from "vue-router";
-import type { ElTooltipProps } from "element-plus";
+import { type UseTooltipProps } from "element-plus";
 import FavoriteButton from "@/components/FavoriteButton.vue";
 
 const formatterFn = (row: LawDocument, col: { property: string }, cellValue) => {
@@ -64,7 +64,6 @@ const {
     computedPaginationTableData,
     sortOptions,
     scrollTable,
-
 } = storeToRefs(store);
 
 const sortingTable = ({ prop, order }) => {
@@ -90,13 +89,15 @@ onUpdated(() => {
 function onScroll(event: Event) {
     const { scrollLeft, scrollTop } = event.target as HTMLBodyElement;
     [
-        scrollTable.value.scrollLeft, scrollTable.value.scrollTop,
+        scrollTable.value.scrollLeft,
+        scrollTable.value.scrollTop,
     ] = [
         scrollLeft,
         scrollTop,
     ];
 }
-const tooltipOptions: Partial<ElTooltipProps> = {
+
+const tooltipOptions: Partial<UseTooltipProps> = {
     strategy: "absolute",
     teleported: true,
     transition: "el-fade-in-linear",
