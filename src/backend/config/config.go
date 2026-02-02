@@ -75,9 +75,11 @@ func LoadConfigFromFile(filename string) (cnf *Config, err error) {
 		createDefaultConfig()
 		return nil, fmt.Errorf("файл конфигурации не найден: %w, сгенерирован шаблон файла конфигурации \"config_example.json\"", err)
 	}
-	if err := file.Close(); err != nil {
-		return nil, err
-	}
+	defer func() {
+		if e := file.Close(); e != nil {
+			err = e
+		}
+	}()
 	return LoadConfig(file)
 }
 
