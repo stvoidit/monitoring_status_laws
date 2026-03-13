@@ -11,9 +11,6 @@ export default ({ mode }: ConfigEnv) => {
     const env = loadEnv(mode, ".");
     const isDev = mode === "development";
     return defineConfig({
-        experimental: {
-            enableNativePlugin: true,
-        },
         plugins: [
             vue({
                 features: {
