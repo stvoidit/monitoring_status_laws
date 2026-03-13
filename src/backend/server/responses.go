@@ -19,7 +19,7 @@ func deferErrLog(err error) {
 const (
 	headerContentType        = "Content-Type"
 	headerContentDisposition = "Content-Disposition"
-	applicationJSON          = "application/jsonl; charset=utf-8"
+	applicationJSON          = "application/json"
 )
 
 // Jsonify - отправка json response
