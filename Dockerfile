@@ -1,10 +1,10 @@
-FROM golang:1.25.6-alpine3.23 AS backend
+FROM golang:1.26.1-alpine3.23 AS backend
 WORKDIR /app
 COPY src/backend .
 ENV CGO_ENABLED=0 GOARCH=amd64 GOOS=linux GOEXPERIMENT='greenteagc,jsonv2'
 RUN go build -mod=vendor -ldflags "-s -w" -o ./build/monitoring_draft_laws ./main.go
 
-FROM node:24.13-alpine3.23 AS frontend
+FROM node:24.14.1-alpine3.23 AS frontend
 ENV PNPM_HOME="/pnpm" PATH+=":$PNPM_HOME"
 RUN corepack enable
 WORKDIR /app
